@@ -7,6 +7,7 @@ use JWTAuth;
 
 use App\Models\buyer;
 use App\Models\buyerAddress;
+use App\Models\cart;
 use GrahamCampbell\ResultType\Success;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Http\Request;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth as FacadesJWTAuth;
 
 class buyerController extends Controller
 {
@@ -36,7 +38,6 @@ class buyerController extends Controller
         //Send failed response if request is not valid
         if ($validator->fails()) {
             return ResponseFormatter::error(null,$validator->errors());
-
         }
         
         
@@ -48,6 +49,12 @@ class buyerController extends Controller
             'password' => bcrypt($request->password),
             'phoneNumber' => $request->phoneNumber,
             
+        ]);
+
+        cart::create([
+            'total' => 0,
+            'buyers_id' => $user->id,
+        
         ]);
 
 
@@ -62,6 +69,8 @@ class buyerController extends Controller
     public function login(Request $request) 
     {
         $credentials = request(['email','password']);
+        $myTTL =1500;
+        FacadesJWTAuth::factory()->setTTL($myTTL);
         $userCheck = Buyer::where('email', $request->email)->get();
 
         if($userCheck === null) {
@@ -72,8 +81,8 @@ class buyerController extends Controller
             return ResponseFormatter::error(null,'Data tidak sesuai ,silahkan coba kembali',401);
         };
 
-        $cookie = cookie('token',$token,60*24);
-        return ResponseFormatter::success(['access_token' => $token, 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60],'Berhasil login')->withCookie($cookie);
+        // $cookie = cookie('token',$token,60*24);
+        return ResponseFormatter::success(['access_token' => $token, 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60],'Berhasil login');
     }
  
     public function logout()

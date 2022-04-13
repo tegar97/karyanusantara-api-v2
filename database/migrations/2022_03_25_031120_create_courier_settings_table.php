@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CourierSettings extends Migration
+class CreateCourierSettingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,12 @@ class CourierSettings extends Migration
      */
     public function up()
     {
-        Schema::table('courier_settings', function (Blueprint $table) {
-            //
+        Schema::create('courier_settings', function (Blueprint $table) {
+            $table->id();
+            $table->integer('umkm_id');
+            $table->integer('courier_id');
+            $table->boolean('status');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +29,6 @@ class CourierSettings extends Migration
      */
     public function down()
     {
-        Schema::table('courier_settings', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('courier_settings');
     }
 }

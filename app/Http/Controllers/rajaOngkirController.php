@@ -133,21 +133,16 @@ class rajaOngkirController extends Controller
 
         $courierGroup = explode(',',$request->courier);
         $isLowerPrice = $request->input('isLowerPrice');
-        if(count($courierGroup) === 1){
-            $response = Http::withHeaders(['key' => env('RAJA_ONGKIR_KEY')])->post('https://api.rajaongkir.com/starter/cost', [
-                'origin'            => $request->origin,
-                'destination'       => $request->destination,
-                'weight'            => $request->weight,
-                'courier'           => $request->courier
-            ]);
-            $ongkir = $response['rajaongkir']['results'];
-        }else{
+     
             foreach($courierGroup as $courier){
-                $response = Http::withHeaders(['key' => env('RAJA_ONGKIR_KEY')])->post('https://api.rajaongkir.com/starter/cost', [
+                $response = Http::withHeaders(['key' => env('RAJA_ONGKIR_KEY')])->post('https://pro.rajaongkir.com/api/cost', [
                     'origin'            => $request->origin,
                     'destination'       => $request->destination,
                     'weight'            => $request->weight,
-                    'courier'           => $courier
+                    'courier'           => $courier,
+                    "originType" => "city",
+                "destinationType" => "subdistrict"
+
                 ]);
 
                 $getCost = $response['rajaongkir']['results'];
@@ -158,7 +153,7 @@ class rajaOngkirController extends Controller
                 $ongkir[] = array(
                     $courier => $getCost
                 );
-            }
+            
 
         }
         

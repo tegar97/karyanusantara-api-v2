@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class SubServiceCourierSettings extends Migration
+class AddDescriptionName extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,8 @@ class SubServiceCourierSettings extends Migration
      */
     public function up()
     {
-        Schema::table('sub_service_courier_settings', function (Blueprint $table) {
-            //
+        Schema::table('umkm', function (Blueprint $table) {
+            $table->string('description')->nullable();;
         });
     }
 
@@ -25,7 +25,7 @@ class SubServiceCourierSettings extends Migration
      */
     public function down()
     {
-        Schema::table('sub_service_courier_settings', function (Blueprint $table) {
+        Schema::table('umkm', function (Blueprint $table) {
             //
         });
     }

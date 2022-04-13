@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCheckoutTable extends Migration
+class AddUmkmIdToItemCarts extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,8 @@ class CreateCheckoutTable extends Migration
      */
     public function up()
     {
-        Schema::create('checkout', function (Blueprint $table) {
-            $table->id();
-            $table->integer('buyer_id');
-            $table->integer('total_amount');
-            $table->integer('total_quantity');
-            $table->timestamps();
+        Schema::table('itemCarts', function (Blueprint $table) {
+            $table->integer('umkm_id');
         });
     }
 
@@ -29,6 +25,8 @@ class CreateCheckoutTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('checkout');
+        Schema::table('itemCarts', function (Blueprint $table) {
+            //
+        });
     }
 }

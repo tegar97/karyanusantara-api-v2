@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateOrdersTable extends Migration
+class CreatePaymentGatewayTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,13 @@ class CreateOrdersTable extends Migration
      */
     public function up()
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('payment_gateway', function (Blueprint $table) {
             $table->id();
-            $table->integer('amount');
-            $table->integer('shipping_amount');
-            $table->string('logistic_code');
-            $table->string('logistic_type');
-            $table->integer('payments_id');
-            $table->integer('umkm_id');
+            $table->string('gateway_name');
+            $table->string('gateway_code');
+            $table->string('gateway_how_to_pay');
+            $table->string('gateway_logo');
+            $table->string('gateway_description');
             $table->timestamps();
         });
     }
@@ -32,6 +31,6 @@ class CreateOrdersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('payment_gateway');
     }
 }

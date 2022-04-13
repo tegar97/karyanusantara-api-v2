@@ -6,11 +6,11 @@ use Illuminate\Support\Facades\Storage;
 use Image;
 class imageResizer{
 
-    public static function ResizeImage($file,$folderName,$imageFor,$width=80,$height=80,$type="png"){
+    public static function ResizeImage($file,$folderName,$imageFor,$width=80,$height=80,$type="png",$quality=90){
         // Resize image
         $resize = Image::make($file)->resize($width, $height, function ($constraint) {
             $constraint->aspectRatio();
-        })->encode($type, 70);
+        })->encode($type, $quality);
 
         // Create hash value
         $hash = md5($resize->__toString());

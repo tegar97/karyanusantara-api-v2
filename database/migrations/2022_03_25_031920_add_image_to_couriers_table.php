@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateCouriersTable extends Migration
+class AddImageToCouriersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,7 +14,7 @@ class CreateCouriersTable extends Migration
     public function up()
     {
         Schema::table('couriers', function (Blueprint $table) {
-            //
+            $table->string('image');
         });
     }
 

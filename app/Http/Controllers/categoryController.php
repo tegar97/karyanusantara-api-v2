@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helper\ResponseFormatter;
 use App\Models\category;
 use App\Models\product;
+use App\Models\subCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -19,13 +20,14 @@ class categoryController extends Controller
 
         return ResponseFormatter::success($categoryData,'Category berhasil ditambahkan');
     }
+    
 
     public function GetProductByCategory(Request $request){
         $city = $request->input('city');
         $multiCity = explode(',', $city);
 
         foreach ($multiCity as $c) {
-            $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->whereRelation("product.umkm", "city_name", "like", "%" . $c . "%")->get();
+            $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->whereRelation("product.umkm", "city_name", "like", "%" . $c . "%")->whereRelation('product','status',2)->get();
            
             // $product->whereRelation("umkm", "city", "LIKE", "%" . $c . "%");
             // $getProduct = $product->get();
@@ -58,30 +60,43 @@ class categoryController extends Controller
         $data = $request->only('categoryName','categoryIcon');
         $validator = Validator::make($data, [
             'categoryName' => 'required|string',
-            'categoryIcon' => 'required',
            
         ]);
         if ($validator->fails()) {
             return
                 ResponseFormatter::error($validator->errors(), 'Failed');
         }
-        $image      = $request->file('categoryIcon');
-        $fileName   = time() . '.' . $image->getClientOriginalExtension();
-        $getImageName = $this->resizeImage($image,$fileName);
+     
 
         $categoryData = category::create([
             'categoryName' => $request->categoryName,
-            'categoryIcon' => $getImageName
+            'categoryIcon' => '-'
         ]);
   
         return ResponseFormatter::success($categoryData,'Kategori Berhasil ditambahkan');
 
         
     }
+
+    public function uploadIcon(Request $request,$id){
+        $image      = $request->file('categoryIcon');
+        $fileName   = time() . '.' . $image->getClientOriginalExtension();
+        $getImageName = $this->resizeImage($image, $fileName);
+
+        $category = category::where('id',$id)->first();
+
+        $category->categoryIcon = $getImageName;
+        $category->save();
+
+        return ResponseFormatter::success($category,'Icon berhasil ditambahkan');
+
+
+    }
     public function destroy($id) {
         // Storage::delete('public/images/categoryIcon/20220318083039-category-png.png');
-        $categoryData = Category::find($id);
-
+        $categoryData = Category::where('id',$id)->first();
+        $subCategories = subCategory::where('category_id', $categoryData->id)->get();
+        $products = product::where('category_id', $categoryData->id)->get();
         if($categoryData === null) {
             return ResponseFormatter::error($data = null,'Category tidak tersedia');
         }
@@ -90,8 +105,15 @@ class categoryController extends Controller
         // unlink(storage_path('categoryIcon/'.$PATH));
         Storage::delete('public/images/categoryIcon/'.$PATH);
 
-
+        foreach ($subCategories as $subCategory){
+            $subCategory->delete();
+        }
+        foreach($products as $product) {
+            $product->delete();
+        }
         $categoryData->delete();
+
+        
         return ResponseFormatter::success(null,'Success');
 
     }
@@ -101,14 +123,10 @@ class categoryController extends Controller
         if ($categoryData === null) {
             return ResponseFormatter::error($data = null, 'Category tidak tersedia');
         }
-        $image      = $request->file('categoryIcon');
-        $fileName   = time() . '.' . $image->getClientOriginalExtension();
-        $getImageName = $this->resizeImage($image, $fileName);
-
-        $categoryData->update(['categoryName' => $request->categoryName,
-        'categoryIcon' => $getImageName,
-        ]);
-        return ResponseFormatter::success(null, 'Success');
+     
+        $categoryData->categoryName = $request->categoryName;
+        $categoryData->save();
+        return ResponseFormatter::success($categoryData, 'Success');
     }
     public function resizeImage($file, $fileNameToStore)
     {
@@ -130,6 +148,13 @@ class categoryController extends Controller
             return $imageName;
         }
         return false;
+    }
+
+    public function getCategoriesWithSub(){
+        $categoryData = category::with('subCategory')->select('id','categoryName','categoryIcon')->get();
+
+        return ResponseFormatter::success($categoryData,'sukses');
+
     }
 }
 

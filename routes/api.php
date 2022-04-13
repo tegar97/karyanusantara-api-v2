@@ -1,14 +1,23 @@
 <?php
 
+use App\Http\Controllers\adminController;
 use App\Http\Controllers\buyerAddressController;
 use App\Http\Controllers\buyerController;
+use App\Http\Controllers\cartController;
 use App\Http\Controllers\categoryController;
+use App\Http\Controllers\CourierController;
 use App\Http\Controllers\orderController;
+use App\Http\Controllers\payment_gateway_controller;
+use App\Http\Controllers\paymentController;
 use App\Http\Controllers\productController;
 use App\Http\Controllers\productGalleryController;
 use App\Http\Controllers\rajaOngkirController;
+use App\Http\Controllers\reviewsController;
 use App\Http\Controllers\subCategoryController;
 use App\Http\Controllers\umkmController;
+use App\Http\Controllers\transctionController;
+use App\Http\Controllers\webHookController;
+use App\Models\review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -42,9 +51,18 @@ Route::group([
     //Api umkm
     Route::post('/umkm/register', [umkmController::class, 'register']);
     Route::post('/umkm/login', [umkmController::class, 'login']);
-    Route::post('/umkm/me', [umkmController::class, 'me']);
+    Route::get('/umkm/me', [umkmController::class, 'me']);
     Route::post('/umkm/logout', [umkmController::class, 'logout']);
-    Route::post('/umkm/refresh', [umkmController::class, 'refresh']);
+    Route::get('/umkm/refresh', [umkmController::class, 'refresh']);
+    Route::put('/umkm/update', [umkmController::class, 'update']);
+    Route::post('/umkm/storeEdit', [umkmController::class, 'storeEdit']);
+    Route::post('/umkm/avatarUpdate', [umkmController::class, 'setAvatar']);
+    Route::post('/umkm/businessSetting', [umkmController::class, 'businessSetting']);
+
+    Route::post('/admin/register', [adminController::class, 'create']);
+    Route::post('/admin/login', [adminController::class, 'login']);
+    Route::get('/admin/me', [adminController::class, 'me']);
+    Route::get('/admin/refresh', [adminController::class, 'refresh']);
 
     
 
@@ -57,6 +75,7 @@ Route::post('/buyerAddress/update/{id}',[buyerAddressController::class, 'update'
 
 //Api image upload
 Route::post('/product/image',[productGalleryController::class, 'create']);
+Route::post('/product/Singleimage',[productGalleryController::class, 'singleUpload']);
 
 //Api category
 
@@ -64,19 +83,29 @@ Route::get('/category',[categoryController::class,'view']);
 Route::get('/category/get-product-by-category',[categoryController::class, 'GetProductByCategory']);
 Route::get('/category/{id}',[categoryController::class,'detail']);
 Route::post('/category',[categoryController::class,'create']);
+Route::post('/uploadIconCategory/{id}',[categoryController::class, 'uploadIcon']);
 Route::delete('/category/{id}',[categoryController::class, 'destroy']);
 Route::post('/category/{id}',[categoryController::class, 'update']);
+Route::get('/categories',[categoryController::class, 'getCategoriesWithSub']);
 
 //Api subCategory
 Route::post('/subCategory',[subCategoryController::class, 'create']);
+Route::get('/subCategory',[subCategoryController::class, 'get']);
 Route::delete('/subCategory/{id}',[subCategoryController::class, 'destroy']);
-Route::put('/subCategory/{id}',[subCategoryController::class, 'update']);
+Route::post('/subCategory/{id}',[subCategoryController::class, 'update']);
 
 Route::get('/umkm/product', [productController::class, 'view']);
+Route::get('/umkm/myproducts', [productController::class, 'myproducts']);
+Route::get('/umkm/underreview', [productController::class, 'underReviewProduct']);
+Route::put('/umkm/product/updatestatus/{id}', [productController::class, 'updateStatus']);
 Route::post('/umkm/product', [productController::class, 'create']);
 Route::get('/umkm/product/{slug}', [productController::class, 'detail']);
+Route::get('/umkm/{slug}', [umkmController::class, 'showUmkmStore']);
+Route::get('/umkm/getCity/{ukmName}', [umkmController::class, 'getUmkmByName']);
 
-Route::post('/orders', [orderController::class, 'NewOrder']);
+Route::post('/orders/mandiribill', [orderController::class, 'orderMandiriBill']);
+Route::post('/orders/indomaret', [orderController::class, 'orderIndomaret']);
+Route::post('/orders/VirtualAccount', [orderController::class, 'VirtualAccount']);
 
 //Raja ongkir
 
@@ -88,3 +117,45 @@ Route::post('/cekongkir', [rajaOngkirController::class, 'cekOngkir']);
 Route::get('/getLowerOngkir', [rajaOngkirController::class, 'getLowerOngkir']);
 
 
+//Courier Service
+Route::post('/courier',[CourierController::class, 'addCourier']);
+Route::post('/subCourier',[CourierController::class, 'addSubServiceCourier']);
+Route::post('/courierSettingUmkm',[CourierController::class, 'settingCouriersUmkm']);
+Route::get('/courier', [CourierController::class, 'getCourier']);
+Route::get('/courier/my', [CourierController::class, 'getMyCourier']);
+
+
+//Reviews
+Route::post('/reviews',[reviewsController::class,'create']);
+
+
+//Cart
+Route::post('/cart',[cartController::class,'create']);
+Route::post('/cart/update',[cartController::class,'update']);
+Route::get('/cart',[cartController::class, 'GetMyCart']);
+Route::delete('/cart/{id}',[cartController::class, 'deleteItem']);
+
+//Gateway
+
+Route::post('/gateway',[payment_gateway_controller::class,'create']);
+Route::get('/gateway',[payment_gateway_controller::class,'view']);
+
+
+Route::get('/payment/{code}', [paymentController::class, 'get']);
+Route::get('/payment', [paymentController::class, 'all']);
+Route::get('/payment/detail/{code}', [paymentController::class, 'detail']);
+Route::get('/payment/status/success', [paymentController::class, 'getHistory']);
+
+
+Route::get('/transaction/code/{status}', [transctionController::class, 'getBuyerTransaction']);
+Route::get('/transaction/seller', [transctionController::class, 'getSellerTransaction']);
+Route::get('/transaction/seller/{code}', [transctionController::class, 'getSellerTransaction']);
+Route::post('/transaction/ComplateTheOrder', [transctionController::class, 'ComplateTheOrder']);
+
+
+Route::post('/webhook', [webHookController::class, 'midtransHandler']);
+
+Route::post('/sendResi', [transctionController::class, 'sendResi']);
+Route::post('/track', [transctionController::class, 'track']);
+Route::get('/admin/product/{slug}', [productController::class, 'detailProductAdminAccess']);
+Route::put('/admin/product/updatestatus/{id}', [productController::class, 'AcceptOrReject']);

@@ -9,7 +9,10 @@ class product extends Model
 {
     use HasFactory;
     protected $guarded = ['id'];
-
+    public function review()
+    {
+        return $this->hasMany(review::class,'products_id','id');
+    }
 
     public function umkm(){
         return  $this->hasOne(umkm::class, 'id', 'umkm_id');
@@ -21,6 +24,6 @@ class product extends Model
     public function category(){
         return $this->hasOne(category::class,'id','category_id');
     }
-
+  
     
 }

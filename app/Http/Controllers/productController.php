@@ -64,11 +64,6 @@ class productController extends Controller
 
               
             }
-        
-
-
-
-            
         }
 
       
@@ -77,10 +72,69 @@ class productController extends Controller
 
     }
 
+    public function updateStatus(Request $request,$id){
+        $user = auth('umkm')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+         $product = product::where('id',$id)->first();
+         if($product->umkm_id === $user['id']){
+            $product->update(['status' => $request->status]);
+         }else{
+            return ResponseFormatter::success('fail');
+
+         }
+     
+        return ResponseFormatter::success('sukses update');
+
+    }
+
+    public function myproducts(){
+        $user = auth('umkm')->user();
+        
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+        $products = product::where('umkm_id', $user['id'])->with('images');
+
+        return ResponseFormatter::success($products->paginate(10),'berhasil');
+    }
+    public function underReviewProduct(){
+        $user = auth('admin')->user();
+        
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+        $products = product::with('images','umkm:id,ukmName,email,ownerPhoneNumber');
+
+        return ResponseFormatter::success($products->paginate(10),'berhasil');
+    }
+
     public function detail(Request $request,$slug) {
 
 
-        $productData = product::with('images', 'umkm:id,ukmName,city_name','category:id,categoryName')->where('slug', $slug)->get();
+        $productData = product::with('images', 'review.buyers','umkm:id,ukmName,city_name,city_id,slug', 'umkm.courier.courier','category:id,categoryName')->where('slug', $slug)->withAvg('review','stars')->get();
+      
+        // foreach($productData as $product){
+        //     foreach($product['review'] as $review){
+        //            $reviewTotal[] = array(
+        //             $review['stars']
+        //            );
+               
+        //     }
+            
+
+           
+        // }
+
+        // for($i=0; $i < count($reviewTotal); $i++) {
+        //     $total = $reviewTotal[$i] ;
+
+        // }
+      
         if($productData === null){
             return ResponseFormatter::error(null, 'Tidak menemukan product', 404);
             
@@ -96,4 +150,51 @@ class productController extends Controller
     //     $productData = product::with('umkm')->where('slug', $slug)->get();
 
     // }
+
+    public function detailProductAdminAccess(Request $request, $slug)
+    {
+
+
+        $productData = product::with('images', 'review.buyers', 'umkm', 'umkm.courier.courier', 'category:id,categoryName')->where('slug', $slug)->withAvg('review', 'stars')->get();
+
+        // foreach($productData as $product){
+        //     foreach($product['review'] as $review){
+        //            $reviewTotal[] = array(
+        //             $review['stars']
+        //            );
+
+        //     }
+
+
+
+        // }
+
+        // for($i=0; $i < count($reviewTotal); $i++) {
+        //     $total = $reviewTotal[$i] ;
+
+        // }
+
+        if ($productData === null) {
+            return ResponseFormatter::error(null, 'Tidak menemukan product', 404);
+        }
+
+        return ResponseFormatter::success($productData, 'Success');
+    }
+
+    public function AcceptOrReject(Request $request, $id)
+    {
+        $user = auth('admin')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+        $product = product::where('id', $id)->first();
+        if ($product->umkm_id !== null) {
+            $product->update(['status' => $request->status]);
+        } else {
+            return ResponseFormatter::success('fail');
+        }
+
+        return ResponseFormatter::success('sukses update');
+    }
 }

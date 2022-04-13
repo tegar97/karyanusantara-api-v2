@@ -9,7 +9,15 @@ class order extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['buyers_id', 'payment','courir','total_quantity','total_amount','status'];
+    protected $fillable = ['amount', 'shipping_amount', 'logistic_code', 'logistic_type', 'payments_id', 'umkm_id'];
 
+    public function umkm()
+    {
+        return  $this->hasOne(umkm::class, 'id', 'umkm_id');
+    }
 
+    public function orderItem()
+    {
+        return $this->hasMany(ordersproduct::class, 'orders_id', 'id');
+    }
 }

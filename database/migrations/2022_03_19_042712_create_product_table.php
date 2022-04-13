@@ -27,6 +27,12 @@ class CreateProductTable extends Migration
             $table->string('isPreOrderTime')->default('-');
             $table->string('price');
             $table->string('weight');
+            $table->string('sku')->nullable();
+            $table->string('brand')->nullable();
+            $table->string('length')->nullable();;
+            $table->string('width')->nullable();;
+            $table->string('height')->nullable();
+            $table->string('diameter')->nullable();;
             $table->integer('umkm_id')->nullable();
             $table->integer('admin_id')->nullable();
             $table->integer('status')->nullable();

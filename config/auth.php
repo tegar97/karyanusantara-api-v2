@@ -45,6 +45,10 @@ return [
             'driver' => 'jwt',
             'provider' => 'umkm',
         ],
+        'admin' => [
+            'driver' => 'jwt',
+            'provider' => 'admin',
+        ],
     ],
 
     /*
@@ -72,6 +76,10 @@ return [
         'umkm' => [
             'driver' => 'eloquent',
             'model' => App\Models\umkm::class,
+        ],
+        'admin' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\admin::class,
         ]
 
         
