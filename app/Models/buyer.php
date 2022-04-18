@@ -21,7 +21,10 @@ class buyer extends Authenticatable implements JWTSubject, MustVerifyEmail
         'email_verify_expire',
         'password_reset_token',
         'phoneNumber',
-        'password_reset_token_expire'
+        'password_reset_token_expire',
+        'lkppRole',
+        'namaInstansi',
+        'namaSatker'
     
     ];
     public function getJWTIdentifier()
@@ -36,7 +39,7 @@ class buyer extends Authenticatable implements JWTSubject, MustVerifyEmail
      */
     public function getJWTCustomClaims()
     {
-        return [];
+        return ['token_lkpp'];
     }
     protected $hidden = [
         'password', 'remember_token',

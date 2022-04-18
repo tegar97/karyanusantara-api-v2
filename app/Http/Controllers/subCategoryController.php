@@ -20,7 +20,7 @@ class subCategoryController extends Controller
 
         ]);
 
-        $checkCategory  = category::find($request->category_id);
+        $checkCategory  = category::where('id',$request->category_id);
         if (!$checkCategory) {
             return ResponseFormatter::error('data category tidak ada');
         };
@@ -41,6 +41,12 @@ class subCategoryController extends Controller
     {
         $subCategory = subCategory::with('category')->get();
         return ResponseFormatter::success($subCategory, 'Sub Category Berhasil ditambahkan');
+    }
+
+    public function getSubCategoryByCategory($id) {
+        $subCategory = subCategory::where('category_id', $id)->with('products')->get();
+        return ResponseFormatter::success($subCategory, 'Berhasil mendapatkan subcategory');
+
     }
     public function destroy($id)
     {

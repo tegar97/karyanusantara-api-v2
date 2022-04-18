@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Image;
 use Intervention\Image\ImageManagerStatic;
+use PhpParser\Node\Stmt\Foreach_;
 
 class categoryController extends Controller
 {
@@ -24,14 +25,25 @@ class categoryController extends Controller
 
     public function GetProductByCategory(Request $request){
         $city = $request->input('city');
+        $category = $request->input('category');
+        $subCategory = $request->input('subcategory');
         $multiCity = explode(',', $city);
-
+        $multiSubCategory = explode(',', $subCategory);
+        $getProductByCity = [];
         foreach ($multiCity as $c) {
-            $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->whereRelation("product.umkm", "city_name", "like", "%" . $c . "%")->whereRelation('product','status',2)->get();
+
+            if($category !== null){
+                $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->where('code', $category)->WhereRelation("product.umkm", "province_name", "like", "%" . $c . "%")->whereRelation('product', 'status', 2)->get();
+
+            }else{
+                $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->WhereRelation("product.umkm", "province_name", "like", "%" . $c . "%")->whereRelation('product', 'status', 2)->get();
+
+            }
            
             // $product->whereRelation("umkm", "city", "LIKE", "%" . $c . "%");
             // $getProduct = $product->get();
             foreach($categories as $category) {
+                
                 $getProductByCity[] = array(
                     'categoryName' => $category['categoryName'],
                     'product' => $category['product']
@@ -48,8 +60,33 @@ class categoryController extends Controller
             // }
         
 
-        }
-        return ResponseFormatter::success($getProductByCity,'Berhasil mendapakan produk');
+        };
+        // foreach($multiSubCategory as $sub){
+        //     if ($sub !== null) {
+        //         $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->WhereRelation('categoryName', $category)->WhereRelation("product.umkm", "province_name", "like", "%" . $c . "%")->whereRelation('product', 'status', 2)->get();
+        //     } else {
+        //         $categories = category::with('product.images', 'product.umkm:id,city_name,ukmName')->WhereRelation("product.umkm", "province_name", "like", "%" . $c . "%")->whereRelation('product', 'status', 2)->get();
+        //     }
+
+        //     // $product->whereRelation("umkm", "city", "LIKE", "%" . $c . "%");
+        //     // $getProduct = $product->get();
+        //     foreach ($categories as $category) {
+        //         $getProductByCity[] = array(
+        //             'categoryName' => $category['categoryName'],
+        //             'product' => $category['product']
+        //         );
+        //     }
+        // }
+
+            return ResponseFormatter::success($getProductByCity,'Berhasil mendapakan produk');
+      
+    }
+
+    public function getCategoryAndSubcategory(){
+        $category = category::with('subCategory')->take(7)->get();
+
+        return ResponseFormatter::success($category, 'Berhasil');
+
     }
     public function detail($id) {
         $categoryData = category::where('id',$id)->with('subCategory')->get();
@@ -70,6 +107,7 @@ class categoryController extends Controller
 
         $categoryData = category::create([
             'categoryName' => $request->categoryName,
+            'code' => $request->categoryCode,
             'categoryIcon' => '-'
         ]);
   
@@ -125,6 +163,7 @@ class categoryController extends Controller
         }
      
         $categoryData->categoryName = $request->categoryName;
+        $categoryData->code = $request->categoryCode;
         $categoryData->save();
         return ResponseFormatter::success($categoryData, 'Success');
     }

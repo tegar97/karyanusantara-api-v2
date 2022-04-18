@@ -43,7 +43,7 @@ class CreateUmkmTable extends Migration
             $table->string('annualIncome')->nullable();;
             $table->boolean('isAccept')->nullable();
             $table->string('rejectReason')->nullable();
-            $table->integer('bankAccountNumber')->nullable();
+            $table->bigInteger('bankAccountNumber')->nullable();
             $table->string('bankAccountName')->nullable();
             $table->string('bankAccountType')->nullable();
             $table->string('profile_photo')->nullable();

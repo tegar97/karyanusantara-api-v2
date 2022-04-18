@@ -45,6 +45,8 @@ Route::group([
     Route::post('/refresh',[buyerController::class,'refresh']);
     Route::post('/update', [buyerController::class, 'update']);
     Route::post('/changePassword', [buyerController::class, 'changePassword']);
+    Route::post('/checklkpp/{token}', [buyerController::class, 'checklkpp']);
+    Route::post('/sso', [buyerController::class, 'loginsso']);
 
 
 
@@ -87,21 +89,28 @@ Route::post('/uploadIconCategory/{id}',[categoryController::class, 'uploadIcon']
 Route::delete('/category/{id}',[categoryController::class, 'destroy']);
 Route::post('/category/{id}',[categoryController::class, 'update']);
 Route::get('/categories',[categoryController::class, 'getCategoriesWithSub']);
+Route::get('/categoriestMain',[categoryController::class, 'getCategoryAndSubcategory']);
 
 //Api subCategory
 Route::post('/subCategory',[subCategoryController::class, 'create']);
 Route::get('/subCategory',[subCategoryController::class, 'get']);
 Route::delete('/subCategory/{id}',[subCategoryController::class, 'destroy']);
 Route::post('/subCategory/{id}',[subCategoryController::class, 'update']);
+Route::get('/getSubCategoryByCategory/{id}',[subCategoryController::class, 'getSubCategoryByCategory']);
 
 Route::get('/umkm/product', [productController::class, 'view']);
 Route::get('/umkm/myproducts', [productController::class, 'myproducts']);
 Route::get('/umkm/underreview', [productController::class, 'underReviewProduct']);
 Route::put('/umkm/product/updatestatus/{id}', [productController::class, 'updateStatus']);
 Route::post('/umkm/product', [productController::class, 'create']);
+Route::get('/umkm/product/main', [productController::class, 'getMainProduct']);
 Route::get('/umkm/product/{slug}', [productController::class, 'detail']);
 Route::get('/umkm/{slug}', [umkmController::class, 'showUmkmStore']);
 Route::get('/umkm/getCity/{ukmName}', [umkmController::class, 'getUmkmByName']);
+Route::post('/umkm/uploadKtp', [umkmController::class, 'uploadKtp']);
+Route::post('/umkm/addNPWPPhoto', [umkmController::class, 'addNPWPPhoto']);
+Route::post('/umkm/addNpwp', [umkmController::class, 'addNpwp']);
+Route::post('/umkm/addBank', [umkmController::class, 'addBank']);
 
 Route::post('/orders/mandiribill', [orderController::class, 'orderMandiriBill']);
 Route::post('/orders/indomaret', [orderController::class, 'orderIndomaret']);
@@ -159,3 +168,4 @@ Route::post('/sendResi', [transctionController::class, 'sendResi']);
 Route::post('/track', [transctionController::class, 'track']);
 Route::get('/admin/product/{slug}', [productController::class, 'detailProductAdminAccess']);
 Route::put('/admin/product/updatestatus/{id}', [productController::class, 'AcceptOrReject']);
+Route::put('/admin/product/addMainProduct/{id}', [productController::class, 'addMainProduct']);

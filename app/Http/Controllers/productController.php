@@ -197,4 +197,27 @@ class productController extends Controller
 
         return ResponseFormatter::success('sukses update');
     }
+
+    public function addMainProduct(Request $request,$id){
+        $user = auth('admin')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+        $product = product::where('id', $id)->first();
+
+        if ($product->umkm_id !== null) {
+            $product->update(['isMainProduct' => $request->isMainAddress]);
+        } else {
+            return ResponseFormatter::error('fail');
+        }
+    }
+
+    public function getMainProduct(){
+        $product = product::where('isMainProduct',1 )->with('images','umkm')->get();
+
+        return ResponseFormatter::success($product,'success');
+
+
+    }
 }

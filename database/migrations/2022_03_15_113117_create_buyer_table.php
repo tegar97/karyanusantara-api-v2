@@ -24,12 +24,12 @@ class CreateBuyerTable extends Migration
             $table->boolean('isVerify')->default(false);
             $table->string('email_verify_expire')->nullable();
             $table->string('email_verify_token')->nullable();
-
             $table->string('password_reset_token')->nullable();
             $table->rememberToken();
-
             $table->date('password_reset_token_expire')->nullable();
-            
+            $table->string('lkppRole')->nullable();
+            $table->string('namaInstansi')->nullable();
+            $table->string('namaSatker')->nullable();
             $table->timestamps();
         });
     }

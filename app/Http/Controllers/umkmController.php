@@ -37,7 +37,7 @@ class umkmController extends Controller
         $umkmData = umkm::create([
             'email' => $request->email,
             'password' =>  bcrypt($request->password),
-            'ukmName' => $request->email,
+            'ukmName' => $request->ukmName,
 
         ]);
         $userCheck = umkm::where('slug',Str::slug($request->ukmName))->first();
@@ -125,6 +125,7 @@ class umkmController extends Controller
         $umkmData->village = $request->village;
         $umkmData->postalCode = $request->postalCode;
         $umkmData->ukmAddress = $request->ukmAddress;
+        $umkmData->StoreSettingDone = 1;
 
         $umkmData->save();
         return ResponseFormatter::success('Data telah diupdate');
@@ -175,6 +176,7 @@ class umkmController extends Controller
         $umkmData->businessStart = $request->businessStart;
         $umkmData->totalEmployee = $request->totalEmployee;
         $umkmData->isInterestedToJoinUmkmid = $request->isInterestedToJoinUmkmid;
+        $umkmData->GeneralInfomrationDone = 1;
 
         $umkmData->save();
         return ResponseFormatter::success('Data telah diupdate');
@@ -209,6 +211,93 @@ class umkmController extends Controller
         return ResponseFormatter::success(['access_token' => auth('umkm')->refresh(), 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60], 'Refresh tokeun success');
 
    
+    }
+    public function addNpwp(Request $request){
+        $user = auth('umkm')->user();
+        if ($user === null) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+
+        $umkmData = umkm::where('id', $user['id'])->first();
+        if ($umkmData === null) {
+            return ResponseFormatter::error('Tidak dapat menemukan data ukm', 400);
+        }
+        $umkmData->npwp_no = $request->npwp_no;
+        $umkmData->documentSettingStatus =1;
+        
+        $umkmData->save();
+
+        return ResponseFormatter::success('Berhasil update data');
+
+    }
+
+    function addNPWPPhoto(Request $request)
+    {
+        $user = auth('umkm')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+
+        $umkmData = umkm::where('id', $user['id'])->first();
+        if ($umkmData === null) {
+            return ResponseFormatter::error('Tidak dapat menemukan data ukm', 400);
+        }
+        $image = $request->file('npwp_photo');
+
+        if ($image) {
+            $getImageName = imageResizer::ResizeImage($image, 'npwp', 'umkm-photo', 120, 120);
+            $umkmData->npwp_photo = $getImageName;
+            $umkmData->documentSettingStatus = 1;
+            $umkmData->save();
+        }
+
+        return ResponseFormatter::success('Sukses upload avatar');
+    }
+
+    function uploadKtp(Request $request) {
+        $user = auth('umkm')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+
+        $umkmData = umkm::where('id', $user['id'])->first();
+        if ($umkmData === null) {
+            return ResponseFormatter::error('Tidak dapat menemukan data ukm', 400);
+        }
+        $image = $request->file('ktp_photo');
+
+        if ($image) {
+            $getImageName = imageResizer::ResizeImage($image, 'ktp', 'ktp-photo', 120, 120);
+            $umkmData->ktp_photo = $getImageName;
+            $umkmData->save();
+        }
+
+        return ResponseFormatter::success('Sukses upload avatar');
+    }
+
+    public function addBank(Request $request){
+        $user = auth('umkm')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+
+        $umkmData = umkm::where('id', $user['id'])->first();
+        if ($umkmData === null) {
+            return ResponseFormatter::error('Tidak dapat menemukan data ukm', 400);
+        }
+
+        $umkmData->bankAccountNumber = $request->bankAccountNumber;
+        $umkmData->bankAccountName	 = $request->bankAccountName;
+        $umkmData->bankAccountType	 = $request->bankAccountType;
+        $umkmData->bankSettingStatus = 1;
+        $umkmData->save();
+
+        return ResponseFormatter::success('Sukses add bank data');
+
+
     }
 
     public function logout()
