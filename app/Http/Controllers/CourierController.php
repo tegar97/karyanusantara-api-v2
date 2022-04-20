@@ -62,7 +62,7 @@ class CourierController extends Controller
             return ResponseFormatter::error('Please Login for continue ', 401);
         }
 
-        $courier_setting = courier_settings::where('courier_id',$request->courier_id)->first();
+        $courier_setting = courier_settings::where('courier_id',$request->courier_id)->where('umkm_id',$user['id'])->first();
         if($courier_setting !== null){
             $courier_setting->status = $request->status;
             $courier_setting->save();
