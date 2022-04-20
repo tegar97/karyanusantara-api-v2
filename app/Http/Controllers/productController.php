@@ -71,7 +71,66 @@ class productController extends Controller
         return ResponseFormatter::success($getProductByCity, 'Success');
 
     }
+    public function filterCategory(Request $request ){
+        $category = $request->input('category');
+        $subcategory = $request->input('subcategory');
+        $province = $request->input('province');
+        $multiSubCategory = explode(',', $subcategory);
+        $multiProvince = explode(',', $province);
+        if($province !== null){
 
+            if ($category !== null) {
+                if ($subcategory !== null) {
+                    $product =    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->whereRelation('category', 'code', $category)->whereIn('subcategory_id', $multiSubCategory)->whereHas('umkm', function ($query) use ($multiProvince) {
+                        $query->whereIn('province_id', $multiProvince);
+                    })->get();
+            
+                } else {
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->whereRelation('category', 'code', $category)->whereHas('umkm', function ($query) use ($multiProvince) {
+                        $query->whereIn('province_id', $multiProvince);
+                    })->get();
+            
+                }
+            } else {
+
+                if($subcategory !== null){
+
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->whereIn('subcategory_id', $multiSubCategory)->whereHas('umkm', function ($query) use ($multiProvince) {
+                        $query->whereIn('province_id', $multiProvince);
+                    })->get();
+                }else{
+
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->whereHas('umkm', function ($query) use ($multiProvince) {
+                        $query->whereIn('province_id', $multiProvince);
+                    })->get();
+                }
+
+            
+            }
+        
+        }else{
+
+            if($category !== null){
+                if ($subcategory !== null) {
+                    $product = product::where('status', 2)->with('category', 'images','umkm:id,ukmName,province_id,province_name','category')->whereRelation('category','code',$category)->whereIn('subcategory_id', $multiSubCategory)->get();
+                } else {
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->whereRelation('category','code',$category)->get();
+                }
+            }else{
+                if ($subcategory !== null) {
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name', 'category')->whereIn('subcategory_id', $multiSubCategory)->get();
+                } else {
+                    $product = product::where('status', 2)->with('category', 'images', 'umkm:id,ukmName,province_id,province_name')->get();
+                }
+
+            }
+
+        }
+     
+        return ResponseFormatter::success($product, 'Success');
+
+    
+    }
     public function updateStatus(Request $request,$id){
         $user = auth('umkm')->user();
 
@@ -217,6 +276,22 @@ class productController extends Controller
         $product = product::where('isMainProduct',1 )->with('images','umkm')->get();
 
         return ResponseFormatter::success($product,'success');
+
+
+    }
+
+    public function updateStock(Request $request){
+        $user = auth('umkm')->user();
+
+        if ($user === null) {
+            return ResponseFormatter::error('Please Login for continue ', 401);
+        }
+        $product = product::where('id', $request->id)->where('umkm_id',$user['id'])->first();
+
+        $product->stock = $request->stock;
+        $product->save();
+
+        return ResponseFormatter::success('berhasil');
 
 
     }

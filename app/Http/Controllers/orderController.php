@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+
 class orderController extends Controller
 {
     public function orderMandiriBill(Request $request)
@@ -43,9 +44,9 @@ class orderController extends Controller
         );
 
         $name = explode(' ', $user['name']);
-        
 
-        if(count($name) > 1 ){
+
+        if (count($name) > 1) {
             $customer_details = array(
                 'first_name'       => $name[0],
                 'last_name'        => $name[1],
@@ -53,7 +54,7 @@ class orderController extends Controller
                 'phone'            => $user['phoneNumber'],
 
             );
-        }else{
+        } else {
             $customer_details = array(
                 'first_name'       => $name[0],
                 'email'            => $user['email'],
@@ -61,8 +62,11 @@ class orderController extends Controller
 
             );
         }
-        
+
         $itemTotal = [];
+        $nameProduct = [];
+        $categoryId = [];
+
         foreach ($request->order_list as $orderList) {
             $ongkirTotal[] = array(
                 'id' => rand(),
@@ -77,25 +81,32 @@ class orderController extends Controller
                     'quantity' => $product['quantity'],
                     'name' =>  $product['product']['name'],
                 );
+                // if ($user['username_lkpp' !== null]) {
+                //     $nameProduct[] = $product['product']['name'];
+                //     $categoryId[] = $product['product']['category']['id_kategori_lkpp'];
+                // }
+
             }
         }
+        // dd(implode(',',$nameProduct));
+
         $groupTotal = array_merge($ongkirTotal, $itemTotal);
 
 
-       
-            $echannel = array(
-                "bill_info1" => "Payment:",
-                "bill_info2" => "Pembelian di karyanusantara"
-            );
-            $transaction_data = array(
-                'payment_type' => 'echannel',
-                'transaction_details' => $transaction_details,
-                'echannel' => $echannel,
-                'item_details' => $groupTotal,
-                'customer_details' => $customer_details
 
-            );
-            $response = \Midtrans\CoreApi::charge($transaction_data);
+        $echannel = array(
+            "bill_info1" => "Payment:",
+            "bill_info2" => "Pembelian di karyanusantara"
+        );
+        $transaction_data = array(
+            'payment_type' => 'echannel',
+            'transaction_details' => $transaction_details,
+            'echannel' => $echannel,
+            'item_details' => $groupTotal,
+            'customer_details' => $customer_details
+
+        );
+        $response = \Midtrans\CoreApi::charge($transaction_data);
 
 
         $gatewayCode = payment_gateway::where('gateway_code', $request->payment_code)->first();
@@ -116,7 +127,7 @@ class orderController extends Controller
             'payment_code' => $response->biller_code,
             'payment_key' => $response->bill_key,
         ]);
-
+        $lkPPTransaction = [];
         foreach ($request->order_list as $orderList) {
             $order = order::create([
                 'amount' => $orderList['amount'],
@@ -127,33 +138,69 @@ class orderController extends Controller
                 'payments_id' => $payment['id']
             ]);
 
+
             foreach ($orderList['item_list'] as $product) {
+
                 ordersproduct::create([
                     'orders_id' => $order->id,
                     'quantity' => $product['quantity'],
                     'product_id' => $product['product']['id'],
                     'amount' => $product['product']['price'] * $product['quantity'],
                 ]);
+            
+                if ($user['username_lkpp']!== null) {
+                    $nameProduct[] = $product['product']['name'];
+                    $categoryId[] = (int)$product['product']['category']['id_kategori_lkpp'];
+                }
+                
             }
+            if ($user['username_lkpp'] !== null) {
+                $lkPPTransaction = array(
+                    'valuasi' => $orderList['amount'] + $orderList['shipping_amount'],
+                    'id_kategori' => array_unique($categoryId),
+                    'order_id' => "INV" . "/" . date('Ymd') . "/" . $order->id,
+                    'order_desc' => implode(',', $nameProduct),
+                    'email' => $user['email'],
+                    'phone' => $user['phoneNumber'],
+                    'username' => $user['username_lkpp'],
+                    'nama_merchant' => $orderList['merchent_name'],
+                    'metode_bayar' => 'transfer',
+                    'token' => $orderList['token']
+                );
+                return ResponseFormatter::success($lkPPTransaction, 'berhasil');
+                //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
+ 
+            }
+
+          
         };
 
+   
 
 
         //Delete ccart
-        $cart = cart::where('buyers_id',$user['id'])->first();
+        $cart = cart::where('buyers_id', $user['id'])->first();
         $cart->total = 0;
         $cart->save();
 
-        itemCart::where('carts_id',$cart->id)->delete();
+        // if($user['username_lkpp' !== null]){
+        //         $transactionData = array(
+        //         'valuasi' => $request->amount + $request->shipping_amount,
+        //         'id_kategori' => array_unique($categoryId),
+        //         'order_id' => "INV" . "/" . date('Ymd') . "/" . $payment->id,
+        //         'order_desc' => $nameProduct,
+        //         'email' => $user['email'],
+        //         'phone' => $user['phone'],
+        //         'username' => $user['username'],
+        //         'nama_merchant' => $user[]
+
+        //         );
+        // }
+
+        itemCart::where('carts_id', $cart->id)->delete();
+
 
         return ResponseFormatter::success($response, 'berhasil');
-
-        
-
-
-
-
-
     }
 
     public function orderIndomaret(Request $request)
@@ -245,7 +292,7 @@ class orderController extends Controller
             'payment_status' => 2,
             'snap_url' => '-',
             'paymet_gateway_id' => $gatewayCode['id'],
-            'payment_code' => $response->payment_code ,
+            'payment_code' => $response->payment_code,
         ]);
 
         foreach ($request->order_list as $orderList) {
@@ -278,13 +325,14 @@ class orderController extends Controller
 
         return ResponseFormatter::success($response, 'berhasil');
 
-        
+
 
         return ResponseFormatter::success($response, 'berhasil');
     }
 
 
-    public function VirtualAccount(Request $request){
+    public function VirtualAccount(Request $request)
+    {
 
         \Midtrans\Config::$clientKey = env('MIDTRANS_CLIENT_KEY');
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
@@ -341,11 +389,11 @@ class orderController extends Controller
             }
         }
         $groupTotal = array_merge($ongkirTotal, $itemTotal);
-        
+
 
 
         $bank_transfer = array(
-              "bank" => $request->payment_code
+            "bank" => $request->payment_code
         );
         $transaction_data = array(
             'payment_type' => 'bank_transfer',
@@ -404,10 +452,9 @@ class orderController extends Controller
 
         return ResponseFormatter::success($response, 'berhasil');
 
-        
+
 
         return ResponseFormatter::success($response, 'berhasil');
-
     }
 
     private function getMidtransSnapshot($params)

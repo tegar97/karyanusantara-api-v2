@@ -16,6 +16,7 @@ use App\Http\Controllers\reviewsController;
 use App\Http\Controllers\subCategoryController;
 use App\Http\Controllers\umkmController;
 use App\Http\Controllers\transctionController;
+use App\Http\Controllers\transferLogController;
 use App\Http\Controllers\webHookController;
 use App\Models\review;
 use Illuminate\Http\Request;
@@ -78,6 +79,7 @@ Route::post('/buyerAddress/update/{id}',[buyerAddressController::class, 'update'
 //Api image upload
 Route::post('/product/image',[productGalleryController::class, 'create']);
 Route::post('/product/Singleimage',[productGalleryController::class, 'singleUpload']);
+Route::get('/products',[productController::class, 'filterCategory']);
 
 //Api category
 
@@ -111,6 +113,7 @@ Route::post('/umkm/uploadKtp', [umkmController::class, 'uploadKtp']);
 Route::post('/umkm/addNPWPPhoto', [umkmController::class, 'addNPWPPhoto']);
 Route::post('/umkm/addNpwp', [umkmController::class, 'addNpwp']);
 Route::post('/umkm/addBank', [umkmController::class, 'addBank']);
+Route::put('/umkm/product/updateStock', [productController::class, 'updateStock']);
 
 Route::post('/orders/mandiribill', [orderController::class, 'orderMandiriBill']);
 Route::post('/orders/indomaret', [orderController::class, 'orderIndomaret']);
@@ -169,3 +172,8 @@ Route::post('/track', [transctionController::class, 'track']);
 Route::get('/admin/product/{slug}', [productController::class, 'detailProductAdminAccess']);
 Route::put('/admin/product/updatestatus/{id}', [productController::class, 'AcceptOrReject']);
 Route::put('/admin/product/addMainProduct/{id}', [productController::class, 'addMainProduct']);
+
+Route::post('/transferLog', [transferLogController::class, 'create']);
+Route::get('/umkm/history/salesHistory', [transferLogController::class, 'getHistory']);
+Route::get('/getUmkm', [adminController::class, 'getUmkm']);
+Route::get('/getUmkm/{id}', [adminController::class, 'getUmkmDetail']);

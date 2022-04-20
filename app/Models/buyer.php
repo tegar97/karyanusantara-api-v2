@@ -24,7 +24,8 @@ class buyer extends Authenticatable implements JWTSubject, MustVerifyEmail
         'password_reset_token_expire',
         'lkppRole',
         'namaInstansi',
-        'namaSatker'
+        'namaSatker',
+        'username_lkpp'
     
     ];
     public function getJWTIdentifier()

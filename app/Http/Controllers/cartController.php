@@ -219,7 +219,7 @@ class cartController extends Controller
     public function GetMyCart(Request $request) {
         $checkUser =   auth('api')->user();
   
-        $carts = cart::where('buyers_id', $checkUser['id'])->with('itemCart.product:id,name,price,weight,stock,minimumOrder', 'itemCart.umkm:id,ukmName,city_id', 'itemCart.umkm.courier.courier' ,'itemCart.product.images')->first();
+        $carts = cart::where('buyers_id', $checkUser['id'])->with('itemCart.product:id,name,price,weight,stock,minimumOrder,category_id', 'itemCart.umkm:id,ukmName,city_id', 'itemCart.umkm.courier.courier' ,'itemCart.product.images','itemCart.product.category')->first();
       
         if (!$checkUser) {
             return ResponseFormatter::error($data = null, 'Please login ');

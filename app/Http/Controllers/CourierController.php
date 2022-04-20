@@ -61,11 +61,22 @@ class CourierController extends Controller
         if ($user === null) {
             return ResponseFormatter::error('Please Login for continue ', 401);
         }
-        $settingCourierUmkm = courier_settings::updateOrCreate([
-            'umkm_id' => $user->id,
-            'courier_id' => $request->courier_id,
-            'status' => $request->status
+
+        $courier_setting = courier_settings::where('courier_id',$request->courier_id)->first();
+        if($courier_setting !== null){
+            $courier_setting->status = $request->status;
+            $courier_setting->save();
+        }else{
+            courier_settings::create(['umkm_id' => $user->id,
+                'courier_id' => $request->courier_id,
+                'status' => $request->status
         ]);
+        }
+        // $settingCourierUmkm = courier_settings::updateOrCreate([
+        //     'umkm_id' => $user->id,
+        //     'courier_id' => $request->courier_id,
+        //     'status' => $request->status
+        // ]);
 
         return ResponseFormatter::success('Sukses');
 

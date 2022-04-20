@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helper\ResponseFormatter;
 use App\Models\admin;
+use App\Models\umkm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
@@ -75,6 +76,19 @@ class adminController extends Controller
     public function refresh()
     {
         return ResponseFormatter::success(['access_token' => auth('admin')->refresh(), 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60], 'Refresh tokeun success');
+    }
+
+    public function  getUmkm($id){
+        $umkm = umkm::with('transaction')->get();
+
+        return ResponseFormatter::success($umkm ,'Sukses');
+
+    }
+    public function  getUmkmDetail($id){
+        $umkm = umkm::with('transaction')->where('id',$id)->get();
+
+        return ResponseFormatter::success($umkm ,'Sukses');
+
     }
  
 }

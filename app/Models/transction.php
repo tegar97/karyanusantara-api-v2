@@ -21,4 +21,9 @@ class transction extends Model
     public function buyers(){
         return $this->hasOne(buyer::class,'id','buyers_id');
     }
+
+    public function transferLog(){
+        return $this->hasOne(transferLog::class, 'transaction_id', 'id');
+
+    }
 }

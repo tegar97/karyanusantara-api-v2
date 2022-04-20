@@ -69,6 +69,7 @@ class buyerController extends Controller
                         'password' => bcrypt($response['data']['email'] . $response['data']['userName']),
                         'phoneNumber' =>  $response['data']['phone'],
                         'lkppRole' => $response['data']['role'],
+                        'username_lkpp' => $response['data']['userName'],
                         'namaInstansi' => $response['data']['namaInstansi'],
                         'namaSatker' => $response['data']['namaSatker'],
 

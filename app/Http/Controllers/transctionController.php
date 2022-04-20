@@ -17,7 +17,7 @@ class transctionController extends Controller
         if ($user === null) {
             return ResponseFormatter::error('Please Login for continue ', 401);
         }
-        $transcation = transction::where('buyers_id', $user['id'])->where('status', $status)->with('transactionItem.product:id,name,price', 'transactionItem.product.images', 'umkm:id,ukmName')->get();
+        $transcation = transction::where('buyers_id', $user['id'])->where('status', $status)->with('transactionItem.product:id,name,price,weight', 'transactionItem.product.images', 'buyers:id,name','umkm:id,ukmName')->get();
 
         return ResponseFormatter::success($transcation,'berhasil');
 

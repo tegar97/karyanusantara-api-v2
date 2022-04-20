@@ -108,6 +108,7 @@ class categoryController extends Controller
         $categoryData = category::create([
             'categoryName' => $request->categoryName,
             'code' => $request->categoryCode,
+            'id_kategori_lkpp' => $request->id_kategori_lkpp,
             'categoryIcon' => '-'
         ]);
   
@@ -164,6 +165,7 @@ class categoryController extends Controller
      
         $categoryData->categoryName = $request->categoryName;
         $categoryData->code = $request->categoryCode;
+        $categoryData->id_kategori_lkpp = $request->id_kategori_lkpp;
         $categoryData->save();
         return ResponseFormatter::success($categoryData, 'Success');
     }
@@ -190,7 +192,7 @@ class categoryController extends Controller
     }
 
     public function getCategoriesWithSub(){
-        $categoryData = category::with('subCategory')->select('id','categoryName','categoryIcon')->get();
+        $categoryData = category::with('subCategory')->select('id','categoryName','categoryIcon','code','id_kategori_lkpp')->get();
 
         return ResponseFormatter::success($categoryData,'sukses');
 

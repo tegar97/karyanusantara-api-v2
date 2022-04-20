@@ -9,6 +9,7 @@ use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Midtrans\Transaction;
 
 class umkm extends Authenticatable implements JWTSubject, MustVerifyEmail
 {
@@ -52,6 +53,11 @@ class umkm extends Authenticatable implements JWTSubject, MustVerifyEmail
 
     public function itemCart(){
         return $this->hasMany(itemCart::class,'umkm_id','id');
+    }
+
+    public function transaction(){
+        return $this->hasMany(transction::class, 'umkm_id', 'id');
+
     }
 
 
