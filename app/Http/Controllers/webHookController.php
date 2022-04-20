@@ -38,7 +38,7 @@ class webHookController extends Controller
         };
         $payment = payment::where('midtrans_order_id',$orderId)->first();
         $order = order::where('payments_id',$payment->id)->with('orderItem')->get();
-        $buyers = buyer::where('id',$payment->buyers_id);
+        // $buyers = buyer::where('id',$payment->buyers_id);
 
         if($payment->payment_status === 1){
             return ResponseFormatter::error('Operation not permitted',405);
@@ -66,7 +66,7 @@ class webHookController extends Controller
             $address = buyerAddress::where('buyers_id', $payment->buyers_id)->first();
             foreach($order as $o){
                 $transction = transction::create([
-                    "invoice" => "INV"."/".date('Ymd'). "/" . $order->id,
+                    "invoice" => "INV"."/".date('Ymd'). "/" . $o->id,
                     "amount" => $o->amount,
                     "shipping_amount" => $o->shipping_amount,
                     "logistic_code" => $o->logistic_code,
