@@ -13,6 +13,7 @@ use App\Models\product;
 use App\Models\transction;
 use App\Models\transction_item;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class webHookController extends Controller
 {
@@ -66,7 +67,7 @@ class webHookController extends Controller
             $address = buyerAddress::where('buyers_id', $payment->buyers_id)->first();
             foreach($order as $o){
                 $transction = transction::create([
-                    "invoice" => "INV"."/".date('Ymd'). "/" . $o->id,
+                    "invoice" => "INV" . "/". $o->id,
                     "amount" => $o->amount,
                     "shipping_amount" => $o->shipping_amount,
                     "logistic_code" => $o->logistic_code,
@@ -92,10 +93,26 @@ class webHookController extends Controller
                     ]);
                 }
 
+                if ($buyers['username_lkpp'] !== null) {
+
+
+                        Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
+                        'order_id' => "INV" . "/" . $o->id,
+                        'konfirmasi_ppmse' => true,
+                        'token' => $buyers['token_transaction_lkpp']
+                      
+                    ]);
+
+                
+                    //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
+
+                }
+
             };
             
             $payment->payment_status = 1;
             $payment->payment_status_str = 'settlement';
+
 
 
             // and response with 200 OK
@@ -107,6 +124,20 @@ class webHookController extends Controller
             // TODO set transaction status on your database to 'failure'
             $payment->payment_status = 3;
             $payment->payment_status_str = 'cancel';
+            $buyers = buyer::where('id', $payment->buyers_id)->first();
+
+            foreach($order as $o){
+                Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
+                    'order_id' => "INV" . "/" . $o->id,
+                    'konfirmasi_ppmse' => false,
+                        "keterangan_ppmse"=> "Kode pembayaran telah expired",
+                    'token' => $buyers['token_transaction_lkpp']
+
+                ]);
+            }
+
+         
+
 
             // and response with 200 OK
         } else if ($transactioStatus == 'pending') {

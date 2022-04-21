@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helper\ResponseFormatter;
+use App\Models\buyer;
 use App\Models\cart;
 use App\Models\itemCart;
 use App\Models\order;
@@ -128,6 +129,7 @@ class orderController extends Controller
             'payment_key' => $response->bill_key,
         ]);
         $lkPPTransaction = [];
+        $changeToken = buyer::where('id',$user['id'])->first();
         foreach ($request->order_list as $orderList) {
             $order = order::create([
                 'amount' => $orderList['amount'],
@@ -148,26 +150,25 @@ class orderController extends Controller
                     'amount' => $product['product']['price'] * $product['quantity'],
                 ]);
             
-                if ($user['username_lkpp']!== null) {
-                    $nameProduct[] = $product['product']['name'];
-                    $categoryId[] = (int)$product['product']['category']['id_kategori_lkpp'];
-                }
-                
             }
             if ($user['username_lkpp'] !== null) {
-                $lkPPTransaction = array(
+            
+
+                $responseLkpp = Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION'),[
                     'valuasi' => $orderList['amount'] + $orderList['shipping_amount'],
-                    'id_kategori' => array_unique($categoryId),
-                    'order_id' => "INV" . "/" . date('Ymd') . "/" . $order->id,
-                    'order_desc' => implode(',', $nameProduct),
+                    'id_kategori' => $orderList['categoryId'],
+                    'order_id' => "INV" . "/" . $order->id,
+                    'order_desc' => implode(',', $orderList['orderDesc']),
                     'email' => $user['email'],
                     'phone' => $user['phoneNumber'],
                     'username' => $user['username_lkpp'],
                     'nama_merchant' => $orderList['merchent_name'],
                     'metode_bayar' => 'transfer',
-                    'token' => $orderList['token']
-                );
-                return ResponseFormatter::success($lkPPTransaction, 'berhasil');
+                    'token' => $user['token_transaction_lkpp']
+                ]);
+
+                $changeToken->token_transaction_lkpp = $responseLkpp['new_token'];
+                $changeToken->save();
                 //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
  
             }
@@ -199,8 +200,16 @@ class orderController extends Controller
 
         itemCart::where('carts_id', $cart->id)->delete();
 
+            if($user['username_lkpp'] !== null){
+            return ResponseFormatter::success([
+                'data' => $response,
+                'data_lkpp' => $responseLkpp->json()
+            ], 'berhasil');
 
-        return ResponseFormatter::success($response, 'berhasil');
+            }else{
+
+                return ResponseFormatter::success($response, 'berhasil');
+            }
     }
 
     public function orderIndomaret(Request $request)
@@ -423,6 +432,7 @@ class orderController extends Controller
             'paymet_gateway_id' => $gatewayCode['id'],
             'payment_key' => $response->va_numbers[0]->va_number,
         ]);
+        $changeToken = buyer::where('id', $user['id'])->first();
 
         foreach ($request->order_list as $orderList) {
             $order = order::create([
@@ -442,6 +452,27 @@ class orderController extends Controller
                     'amount' => $product['product']['price'] * $product['quantity'],
                 ]);
             }
+            if ($user['username_lkpp'] !== null) {
+
+
+                $responseLkpp = Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION'), [
+                    'valuasi' => $orderList['amount'] + $orderList['shipping_amount'],
+                    'id_kategori' => $orderList['categoryId'],
+                    'order_id' => "INV" . "/".$order->id,
+                    'order_desc' => implode(',', $orderList['orderDesc']),
+                    'email' => $user['email'],
+                    'phone' => $user['phoneNumber'],
+                    'username' => $user['username_lkpp'],
+                    'nama_merchant' => $orderList['merchent_name'],
+                    'metode_bayar' => 'transfer',
+                    'token' => $user['token_transaction_lkpp']
+                ]);
+
+                $changeToken->token_transaction_lkpp = $responseLkpp['new_token'];
+                $changeToken->save();
+                //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
+
+            }
         };
         //Delete ccart
         $cart = cart::where('buyers_id', $user['id'])->first();
@@ -450,11 +481,17 @@ class orderController extends Controller
 
         itemCart::where('carts_id', $cart->id)->delete();
 
-        return ResponseFormatter::success($response, 'berhasil');
 
+        if ($user['username_lkpp'] !== null) {
+            return ResponseFormatter::success([
+                'data' => $response,
+                'data_lkpp' => $responseLkpp->json()
+            ], 'berhasil');
+        } else {
 
+            return ResponseFormatter::success($response, 'berhasil');
+        }
 
-        return ResponseFormatter::success($response, 'berhasil');
     }
 
     private function getMidtransSnapshot($params)

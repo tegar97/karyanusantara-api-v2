@@ -43,7 +43,9 @@ class buyerController extends Controller
                     $myTTL = 1500;
                     FacadesJWTAuth::factory()->setTTL($myTTL);
                     $credentials = ['email' => $response['data']['email'], 'password' => $response['data']['email'] . $response['data']['userName']];
-
+                    $refreshToken = buyer::where('email', $response['data']['email'])->first();
+                    $refreshToken->token_transaction_lkpp = $userToken;
+                    $refreshToken->save();
                     if (!$tokenLogin = auth('api')->claims(['token_lkpp' => $userToken])->attempt($credentials)) {
                         return  response()->json([
                             "code" => 400,
@@ -52,6 +54,8 @@ class buyerController extends Controller
                             "status" => false
                         ]);
                     };
+
+
                     return response()->json([
                         "code" => 200,
                         "data" => [
@@ -72,6 +76,7 @@ class buyerController extends Controller
                         'username_lkpp' => $response['data']['userName'],
                         'namaInstansi' => $response['data']['namaInstansi'],
                         'namaSatker' => $response['data']['namaSatker'],
+                        'token_transaction_lkpp' => $userToken
 
                     ]);
 
