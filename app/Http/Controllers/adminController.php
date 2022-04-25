@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Helper\ResponseFormatter;
 use App\Models\admin;
+use App\Models\buyer;
+use App\Models\transction;
 use App\Models\umkm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Midtrans\Transaction;
 use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class adminController extends Controller
@@ -78,17 +81,66 @@ class adminController extends Controller
         return ResponseFormatter::success(['access_token' => auth('admin')->refresh(), 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60], 'Refresh tokeun success');
     }
 
-    public function  getUmkm($id){
-        $umkm = umkm::with('transaction')->get();
+    public function  getUmkm(){
+        $user = auth('admin')->user();
+        if ($user === null) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+        $umkm = umkm::with('transaction:umkm_id,invoice','product:id')->select('id','ukmName','ownerPhoneNumber')->get();
 
         return ResponseFormatter::success($umkm ,'Sukses');
 
     }
     public function  getUmkmDetail($id){
-        $umkm = umkm::with('transaction')->where('id',$id)->get();
+        $user = auth('admin')->user();
+        if ($user === null) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+        $umkm = umkm::with('transaction:umkm_id,invoice', 'product:id')->where('id',$id)->first();
 
         return ResponseFormatter::success($umkm ,'Sukses');
 
     }
+    public function  GetUmkmTransaction($id, $status){
+        $user = auth('admin')->user();
+        if ($user === null) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+        $umkm = transction::with('transactionItem.product:id,name,price,weight', 'transactionItem.product.images', 'umkm:id,ukmName', 'transactionItem.product:id,name,price','buyers:id,username_lkpp,name')->where('umkm_id',$id)->where('status', $status)->get();
+
+        return ResponseFormatter::success($umkm ,'Sukses');
+
+    }
+
+    public function mitraSsoLogin(Request $request){
+        $user = auth('admin')->user();
+        if ($user === null) {
+            return response()->json(['error' => 'Invalid token'], 401);
+        }
+        $email = $request->email;
+        $key = $request->header('key');
+        if($key == env('code_key')){
+            $buyer = umkm::where('email',$email)->first();
+            if($buyer === null){
+                return ResponseFormatter::error('invalid email');
+            }
+
+            if (!$tokenLogin = auth('umkm')->login($buyer)) {
+                return  response()->json([
+                    "code" => 400,
+                    "data" => null,
+                    "message" => "auth failed",
+                    "status" => false
+                ]);
+            };
+
+            return ResponseFormatter::success($tokenLogin);
+
+        }else{
+            return ResponseFormatter::error('invalid key');
+
+        }
+    }
+    
  
 }

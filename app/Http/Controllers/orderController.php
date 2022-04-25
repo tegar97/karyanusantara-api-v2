@@ -65,8 +65,7 @@ class orderController extends Controller
         }
 
         $itemTotal = [];
-        $nameProduct = [];
-        $categoryId = [];
+  
 
         foreach ($request->order_list as $orderList) {
             $ongkirTotal[] = array(

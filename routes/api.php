@@ -177,3 +177,5 @@ Route::post('/transferLog', [transferLogController::class, 'create']);
 Route::get('/umkm/history/salesHistory', [transferLogController::class, 'getHistory']);
 Route::get('/getUmkm', [adminController::class, 'getUmkm']);
 Route::get('/getUmkm/{id}', [adminController::class, 'getUmkmDetail']);
+Route::get('/getUmkmTransaction/{id}/{status}', [adminController::class, 'GetUmkmTransaction']);
+Route::post('/admin/umkm/sso', [adminController::class, 'mitraSsoLogin']);
