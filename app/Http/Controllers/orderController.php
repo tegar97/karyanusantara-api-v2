@@ -139,7 +139,7 @@ class orderController extends Controller
                 'payments_id' => $payment['id']
             ]);
 
-
+            
             foreach ($orderList['item_list'] as $product) {
 
                 ordersproduct::create([
@@ -152,7 +152,7 @@ class orderController extends Controller
             }
             if ($user['username_lkpp'] !== null) {
             
-
+                $findToken = buyer::where('id',$user['id'])->first();
                 $responseLkpp = Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION'),[
                     'valuasi' => $orderList['amount'] + $orderList['shipping_amount'],
                     'id_kategori' => $orderList['categoryId'],
@@ -163,11 +163,11 @@ class orderController extends Controller
                     'username' => $user['username_lkpp'],
                     'nama_merchant' => $orderList['merchent_name'],
                     'metode_bayar' => 'transfer',
-                    'token' => $user['token_transaction_lkpp']
+                    'token' => $findToken['token_transaction_lkpp']
                 ]);
-
                 $changeToken->token_transaction_lkpp = $responseLkpp['new_token'];
                 $changeToken->save();
+                $checkToken[] = $findToken['token_transaction_lkpp'];
                 //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
  
             }
@@ -175,7 +175,6 @@ class orderController extends Controller
           
         };
 
-   
 
 
         //Delete ccart
@@ -453,22 +452,22 @@ class orderController extends Controller
             }
             if ($user['username_lkpp'] !== null) {
 
-
+                $findToken = buyer::where('id', $user['id'])->first();
                 $responseLkpp = Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION'), [
                     'valuasi' => $orderList['amount'] + $orderList['shipping_amount'],
                     'id_kategori' => $orderList['categoryId'],
-                    'order_id' => "INV" . "/".$order->id,
+                    'order_id' => "INV" . "/" . $order->id,
                     'order_desc' => implode(',', $orderList['orderDesc']),
                     'email' => $user['email'],
                     'phone' => $user['phoneNumber'],
                     'username' => $user['username_lkpp'],
                     'nama_merchant' => $orderList['merchent_name'],
                     'metode_bayar' => 'transfer',
-                    'token' => $user['token_transaction_lkpp']
+                    'token' => $findToken['token_transaction_lkpp']
                 ]);
-
                 $changeToken->token_transaction_lkpp = $responseLkpp['new_token'];
                 $changeToken->save();
+                $checkToken[] = $findToken['token_transaction_lkpp'];
                 //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
 
             }
