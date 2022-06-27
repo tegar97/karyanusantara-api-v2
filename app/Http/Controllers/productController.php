@@ -31,6 +31,8 @@ class productController extends Controller
         $productData = product::create($request->all());
         $user = auth('umkm')->user();
 
+        
+
         if($user === null) {
             return ResponseFormatter::error('Please Login for continue ',401);
         }
@@ -175,7 +177,7 @@ class productController extends Controller
     public function detail(Request $request,$slug) {
 
 
-        $productData = product::with('images', 'review.buyers','umkm:id,ukmName,city_name,city_id,slug', 'umkm.courier.courier','category:id,categoryName')->where('slug', $slug)->withAvg('review','stars')->get();
+        $productData = product::with('images', 'review.buyers','umkm:id,ukmName,city_name,city_id,slug', 'umkm.courier.courier','category:id,categoryName','productVariant', 'productVariant.variantOption')->where('slug', $slug)->withAvg('review','stars')->get();
       
         // foreach($productData as $product){
         //     foreach($product['review'] as $review){

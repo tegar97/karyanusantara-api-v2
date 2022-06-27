@@ -98,7 +98,19 @@ class transctionController extends Controller
         if ($user === null) {
             return ResponseFormatter::error('Please Login for continue ', 401);
         }
+
+       
         $transcation = transction::where('id', $request->transaction_id)->where('buyers_id',$user['id'])->first();
+        if ($user['username_lkpp'] !== null) {
+
+
+            Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
+                'order_id' => $transcation->invoice,
+                'konfirmasi_ppmse' => true,
+                'token' => $user['token_transaction_lkpp']
+
+            ]);
+        }
         $transcation->status = 1;
         $transcation->status_str = "SELESAI";
         $transcation->save();

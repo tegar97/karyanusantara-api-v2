@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helper\imageResizer;
 use App\Helper\ResponseFormatter;
+use App\Models\courier;
 use App\Models\courier_settings;
 use App\Models\umkm;
 use Illuminate\Http\Request;
@@ -51,9 +52,11 @@ class umkmController extends Controller
 
         $umkmData->save();
         // Auto setting jne 
+
+        $courier = courier::where("code",'jne')->first();
         courier_settings::updateOrCreate([
             'umkm_id' => $umkmData->id,
-            'courier_id' => 1,
+            'courier_id' => $courier['id'],
             'status' => 1
         ]);
 

@@ -93,20 +93,19 @@ class webHookController extends Controller
                     ]);
                 }
 
-                if ($buyers['username_lkpp'] !== null) {
+                // if ($buyers['username_lkpp'] !== null) {
 
 
-                        Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
-                        'order_id' => "INV" . "/" . $o->id,
-                        'konfirmasi_ppmse' => true,
-                        'token' => $buyers['token_transaction_lkpp']
+                //         Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
+                //         'order_id' => "INV" . "/" . $o->id,
+                //         'konfirmasi_ppmse' => true,
+                //         'token' => $buyers['token_transaction_lkpp']
                       
-                    ]);
+                //     ]);
 
                 
-                    //   Http::withHeaders(['X-Client-Id' => '1234567890qwertyuiop',])->post(env('TOKODARING_DEV'));
 
-                }
+                // }
 
             };
             
@@ -135,7 +134,17 @@ class webHookController extends Controller
 
                 ]);
             }
+            if ($buyers['username_lkpp'] !== null) {
 
+
+                Http::withHeaders(['X-Client-Id' => env('X_Client_Id'), 'X-Client-Secret' => env('X_Client_Secret')])->post(env('TOKODARING_TRANSACTION_UPDATE'), [
+                    'order_id' => "INV" . "/" . $o->id,
+                    'konfirmasi_ppmse' => false,
+                    'keterangan_ppmse' => "pembayaran expired",
+                    'token' => $buyers['token_transaction_lkpp']
+
+                ]);
+            }
          
 
 

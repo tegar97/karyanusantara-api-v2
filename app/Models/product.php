@@ -27,6 +27,10 @@ class product extends Model
     public function subcategory(){
         return $this->hasOne(subCategory::class,'id','subcategory_id');
     }
+
+    public function productVariant(){
+        return $this->hasMany(productVariants::class, 'product_id','id');
+    }
   
     
 }

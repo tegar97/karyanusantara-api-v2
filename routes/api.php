@@ -11,13 +11,16 @@ use App\Http\Controllers\payment_gateway_controller;
 use App\Http\Controllers\paymentController;
 use App\Http\Controllers\productController;
 use App\Http\Controllers\productGalleryController;
+use App\Http\Controllers\productVariantsController;
 use App\Http\Controllers\rajaOngkirController;
 use App\Http\Controllers\reviewsController;
 use App\Http\Controllers\subCategoryController;
 use App\Http\Controllers\umkmController;
 use App\Http\Controllers\transctionController;
 use App\Http\Controllers\transferLogController;
+use App\Http\Controllers\variantsOptionController;
 use App\Http\Controllers\webHookController;
+use App\Models\productVariants;
 use App\Models\review;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -179,3 +182,7 @@ Route::get('/getUmkm', [adminController::class, 'getUmkm']);
 Route::get('/getUmkm/{id}', [adminController::class, 'getUmkmDetail']);
 Route::get('/getUmkmTransaction/{id}/{status}', [adminController::class, 'GetUmkmTransaction']);
 Route::post('/admin/umkm/sso', [adminController::class, 'mitraSsoLogin']);
+
+//Variant
+Route::post('/product/variant', [productVariantsController::class, 'create']);
+Route::post('/product/variant/option', [variantsOptionController::class, 'create']);
